@@ -1,4 +1,0 @@
-candidates: data/crossed/groups_candidate.jsonl
-offset: 0
-limit: 40
-second_fraction: 0.2

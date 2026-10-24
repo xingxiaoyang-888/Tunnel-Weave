@@ -1,0 +1,29 @@
+{
+  "qwen_repo": "Qwen/Qwen3.5-9B",
+  "qwen_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "sam_config": "configs/sam2.1/sam2.1_hiera_l.yaml",
+  "sam_checkpoint_sha256": "2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318",
+  "qwen_max_image_pixels": 1048576,
+  "special_tokens": [
+    "[SEG]",
+    "[NOR]",
+    "[ANO]"
+  ],
+  "cross_attention": {
+    "inner_dim": 256,
+    "heads": 4,
+    "pool_hw": [
+      16,
+      16
+    ],
+    "gate_initial": 0.001
+  },
+  "qwen_path": "models/Qwen3.5-9B",
+  "sam_checkpoint": "models/sam2.1_hiera_large.pt",
+  "seed": 17,
+  "lora": {
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05
+  }
+}

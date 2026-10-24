@@ -1,6 +1,0 @@
--r base.lock.txt
-pytest==8.4.2
-ruff==0.16.7
-mypy==2.3.1
-types-PyYAML==6.0.12.20250915
-build==1.3.0

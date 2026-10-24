@@ -1,3 +1,0 @@
-run: runs/bottle_P_k5_s11
-thresholds: runs/bottle_P_k5_s11/calibration/thresholds.json
-device: cuda:0

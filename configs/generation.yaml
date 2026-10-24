@@ -1,9 +1,0 @@
-manifest: data/manifests/manifest.jsonl
-tasks: data/manifests/generation_tasks.jsonl
-model_path: models_cache/FLUX.1-Fill-dev
-model_lock: reports/S01_download/flux_fill.lock.json
-revision: 358293da0354175698b67ec8299acf928313a78a
-device: cuda:0
-cpu_offload: true
-steps: 50
-guidance: 30

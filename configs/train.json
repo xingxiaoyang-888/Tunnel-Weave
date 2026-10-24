@@ -1,0 +1,15 @@
+{
+  "steps": 1600,
+  "batch_size": 8,
+  "instruction_per_batch": 2,
+  "seed": 17,
+  "checkpoint_every": 400,
+  "arm": "M_full",
+  "learning_rates": {
+    "lora": 1e-05,
+    "new": 2e-05,
+    "decoder": 1e-06
+  },
+  "weight_decay": 0.01,
+  "gradient_clip_norm": 1.0
+}

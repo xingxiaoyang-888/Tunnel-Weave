@@ -1,3 +1,0 @@
-primitives: data/primitives/development
-minimum_timed_calls: 20
-warmup_call_ids: []

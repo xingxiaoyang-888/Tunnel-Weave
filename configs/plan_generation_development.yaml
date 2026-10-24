@@ -1,3 +1,0 @@
-manifest: data/manifests/manifest.jsonl
-phase: development
-rois: annotations/development_rois_reviewed.jsonl

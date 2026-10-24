@@ -1,3 +1,0 @@
-candidates: data/crossed/groups_candidate.jsonl
-reviews: annotations/reviews.jsonl
-second_fraction: 0.2

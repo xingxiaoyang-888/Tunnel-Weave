@@ -1,8 +1,0 @@
--r base.lock.txt
-diffusers==0.35.1
-transformers==4.56.2
-accelerate==1.10.1
-safetensors==0.6.2
-tokenizers==0.22.0
-sentencepiece==0.2.1
-protobuf==6.32.1

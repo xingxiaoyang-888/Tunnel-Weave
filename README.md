@@ -1,58 +1,90 @@
-# DetectFirst
+# TunnelWeave
 
-**DefectFirst: Learning Beyond Editing Shortcuts for Synthetic-to-Real Defect Segmentation**
+**Bridging Vision–Language Semantics and Pixel Evidence for Autonomous Tunnel Inspection**
 
-仓库名称按项目要求使用 **DetectFirst**；论文方法名和 Python 包名分别为 **DefectFirst**、`defectfirst`。
+## Abstract
 
-本仓库实现两项研究贡献：
+Automated tunnel inspection remains constrained by domain shifts, scarce annotated data, and the separation of defect recognition, pixel-level localization, and inspection reporting. We present TunnelWeave, a unified vision–language framework for recognizing thirteen defect categories, segmenting their spatial extent, and generating structured descriptions. Its semantic–spatial coupling module aligns segmentation features with visual-language tokens before language-model processing, allowing category representations to incorporate both contextual semantics and spatial detail. Shared class-query states then guide recognition and mask prediction without manually specified categories or regions. To support domain-specific learning, we construct TunnelInstruct with 1,740 instruction–response pairs and curate a segmentation corpus of over 8,000 images through multi-source integration and pixel-level annotation refinement. TunnelWeave achieves a mean presence-gated intersection over union of 53.52% on fully annotated positive image–class pairs in the validation benchmark and a recognition macro-F1 of 81.86% across seven defect categories on images we collected from real-world tunnel environments. By combining semantic interpretation, pixel-level evidence, and textual reporting, this work supports more informative and automated inspection of rail transit infrastructure.
 
-- **C1：缺陷保持的编辑对照与偏差诊断。** 固定缺陷及必要上下文，让原始外围和两个合格重建外围分别与正常／异常核心交叉组合。
-- **C2：直接用于分割的缺陷表征学习。** 每张图独立编码，在分类器直接使用的归一化特征上同时优化编辑稳定性和缺陷可分性。
+## Architecture
 
-当前是服务器实验前的代码交付。CPU 测试、人工数据夹具、随机初始化官方 DINO 架构检查均不代表真实数据精度或 GPU 性能。完整验证记录见 [验证报告](docs/VALIDATION.md)。
+![TunnelWeave architecture](assets/architecture.png)
 
-## 从这里开始
+[Vector version](assets/architecture.pdf)
 
-- [服务器逐步启动与回传要求](docs/SERVER_START.md)
-- [实现范围、数学约定与对照方法](docs/IMPLEMENTATION.md)
-- [人工复核与六视图流程](docs/ANNOTATION.md)
-- [实验数据格式](docs/DATA_FORMATS.md)
+## Code
 
-在 Python 3.10/3.11 的干净环境中安装。CPU 检查示例：
+TunnelWeave combines **Qwen3.5-9B** and **SAM 2.1 Hiera-L**. Coordinate-aware cross-attention appends spatial features to the visual-language sequence. Shared class states drive thirteen-class recognition and native-resolution segmentation; a separate instruction pass produces structured descriptions.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip==24.3.1
-python -m pip install torch==2.5.1 --no-deps --index-url https://download.pytorch.org/whl/cpu
-python -m pip install -r requirements/dev.lock.txt
-python -m pip install -e . --no-deps
-python -m pip check
-python -m pytest tests -q
-python scripts/smoke_test.py --output-dir reports/cpu_smoke
-```
-
-Windows 将激活命令替换为 `.venv\Scripts\Activate.ps1`。GPU 安装见服务器文档；不要在服务器上沿用 CPU wheel。
-
-## 代码入口
+This repository provides the model, native-pixel supervision, joint training, two ablation switches, checkpointing, image-only inference, and saved-prediction evaluation. The public package is organized as follows:
 
 ```text
-src/defectfirst/
-  assets.py               # 可恢复下载、模型/源码锁、校验
-  planning.py             # 正常父图、生成预算、实验配置编译
-  data/                   # 官方数据导入、角色隔离、支持集、几何映射
-  controls/               # FLUX 原语、掩码初稿、固定核心组合、审核
-  models/                 # 官方 DINOv2、融合解码器、固定尺度余弦头
-  losses/                 # 主方法和内部强对照目标
-  training/               # 固定采样、训练、校准选模、严格断点恢复
-  evaluation/             # 原图预测、校准、指标、编辑诊断
-  external.py             # 公开方法适配器启动与监督预算核查
-scripts/                  # 各步骤命令行入口
-tests/                    # 数值参考、行为、集成与恢复测试
-configs/                  # 可迁移配置
-requirements/             # 已指定版本的依赖；GPU wheel 单独选择
+src/tunnelweave/
+  backbone.py, sequence_concat.py  # Qwen–SAM coupling
+  model.py, ablations.py           # Shared heads and matched controls
+  data.py, losses.py, train.py     # Native labels and joint learning
+  checkpoint.py, inference.py      # Resume state and automatic prediction
+  descriptions.py, metrics.py      # Structured reporting and evaluation
+configs/                          # Backbone and training configurations
+tests/                            # CPU mathematical and interface checks
 ```
 
-主方法与 B0/B1/B2/B3/B4/B5/B7/B8/B9/B10/B11/B12 使用同一训练入口。B9/B11 是明确标注的项目适配，不冒称完整复现原论文。四项公开方法的上游训练、生成和数据适配尚须在服务器阶段逐项接通并验证；编译器将其列为 `WAITING_UPSTREAM_ADAPTER`，不会用占位结果混入主表。
+### Installation
 
-数据、模型、生成图、审核记录、checkpoint 和虚拟环境均不进入 Git。研究结果必须通过真实数据、GPU、人工审核及公平性验收后产生；仓库没有预填提升数值。
+Use Linux, Python 3.12, and a CUDA-compatible PyTorch environment. The original runtime used PyTorch 2.10.0 (CUDA 12.8), Transformers 5.2.0, and PEFT 0.20.0. Training and full-model inference require substantial GPU memory; the experiments used two A800 GPUs per arm.
+
+```bash
+git clone https://github.com/xingxiaoyang-888/Tunnel-Weave.git
+cd Tunnel-Weave
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install torch==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cu128
+pip install -e ".[data,test]"
+pip install "git+https://github.com/facebookresearch/sam2.git@2b90b9f5ceec907a1c18123530e92e794ad901a4"
+```
+
+Download the official backbones, then update `configs/model.json` or set `TUNNELWEAVE_QWEN_PATH` and `TUNNELWEAVE_SAM_CHECKPOINT`:
+
+```bash
+hf download Qwen/Qwen3.5-9B --revision c202236235762e1c871ad0ccb60c8ee5ba337b9a --local-dir models/Qwen3.5-9B
+mkdir -p models
+curl -L https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt -o models/sam2.1_hiera_large.pt
+```
+
+### Prepare and train
+
+Request access to both datasets below and log in with `hf auth login`. Preparation verifies original asset hashes and retains native masks and valid regions.
+
+```bash
+tunnelweave prepare --output data/tunnelweave
+torchrun --standalone --nproc_per_node=2 -m tunnelweave.cli train \
+  --data data/tunnelweave --output runs/full
+```
+
+Use `--arm Q_no_semantic_guidance` for the image-query control or `--arm I_no_instruction_supervision` to disable description CE while retaining visual supervision. Configure the fixed training budget in `configs/train.json`. The default public schedule is a fresh-training recipe; historical curriculum and matched-ablation results are not automatically reproduced by this command. [Implementation details](docs/implementation.md) specify the data, loss, and reproducibility boundaries.
+
+### Inference and evaluation
+
+```bash
+tunnelweave infer --checkpoint runs/full/checkpoint-001600 \
+  --image example.jpg --output outputs/example --descriptions
+
+tunnelweave infer-dataset --checkpoint runs/full/checkpoint-001600 \
+  --data data/heldout --manifest data/heldout/validation.jsonl --output outputs/validation
+tunnelweave evaluate --data data/heldout --manifest data/heldout/validation.jsonl \
+  --predictions outputs/validation --output outputs/metrics
+
+pytest -q
+```
+
+Inference saves thirteen raw and presence-gated masks at the original image resolution. Evaluation reports recognition F1, positive-pair IoU/Dice including misses, full-image/ROI breakdowns, and reliable-region false positives. Supply an annotated held-out manifest for validation; the public datasets are training resources. Trained project checkpoints and held-out benchmark images are not bundled in this source release.
+
+## Datasets
+
+| Dataset | Contents | Access |
+|---|---|---|
+| [TunnelWeave-Segmentation](https://huggingface.co/datasets/augustusper/TunnelWeave-Segmentation) | 8,889 images, 13 defect categories, native masks and validity metadata | Request access |
+| [TunnelInstruct](https://huggingface.co/datasets/augustusper/TunnelInstruct) | 1,740 instruction–response pairs across 1,725 images | Request access |
+
+Both repositories provide category configurations and an `all` configuration. Access requests are reviewed manually. Please retain the source attribution and usage conditions documented in each dataset card. Qwen and SAM remain subject to their respective upstream licenses.

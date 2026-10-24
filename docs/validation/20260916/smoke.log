@@ -1,7 +1,0 @@
-{
-  "status": "PASS",
-  "scope": "artificial CPU fixture, not pretrained DINO/FLUX or research accuracy",
-  "steps": 6,
-  "prediction_replay": "PASS",
-  "research_observation": "NOT_EVALUATED"
-}
